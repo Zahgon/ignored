@@ -17,18 +17,18 @@ name: Nightly
 jobs:
   nightly:
     runs-on: ubuntu-latest
-    name: Test (nightly)
+    name: Test (latest Go)
     steps:
       - uses: actions/checkout@v7
 
-      - name: Install nightly
-        uses: dtolnay/rust-toolchain@nightly
+      - name: Install the latest Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: stable
+          check-latest: true
 
-      - name: cargo test --locked
-        run: cargo test --locked --all-features --all-targets
-
-      - name: cargo test --doc
-        run: cargo test --locked --all-features --doc
+      - name: go test
+        run: go test ./...
 
       - uses: ryanmab/incident-io-alert@v0.1.4
         if: failure() && github.event_name == 'schedule'
@@ -40,30 +40,28 @@ jobs:
           description: |
             The nightly build for the is-ignored repository has failed.
 
-            This would indicate that there is an upcoming set of breaking changes to Rust, or
+            This would indicate that there is an upcoming set of breaking changes to Go, or
             other dependencies, which will require an update to the is-ignored library.
 
   update:
     runs-on: ubuntu-latest
-    name: Test (beta / updated)
+    name: Test (updated modules)
     steps:
       - uses: actions/checkout@v7
 
-      - name: Install nightly
-        uses: dtolnay/rust-toolchain@beta
+      - name: Install the latest Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: stable
 
-      - name: cargo update
-        run: cargo update
+      - name: go get -u
+        run: go get -u ./... && go mod tidy
 
-      - name: cargo test
-        run: cargo test --locked --all-features --all-targets
-        env:
-          RUSTFLAGS: -D deprecated
+      - name: go vet
+        run: go vet ./...
 
-      - name: cargo test --doc
-        run: cargo test --locked --all-features --doc
-        env:
-          RUSTFLAGS: -D deprecated
+      - name: go test
+        run: go test ./...
 
       - uses: ryanmab/incident-io-alert@v0.1.4
         if: failure() && github.event_name == 'schedule'
@@ -75,5 +73,5 @@ jobs:
           description: |
             The nightly build for the is-ignored repository has failed.
 
-            This would indicate that there is an upcoming set of breaking changes to Rust, or
+            This would indicate that there is an upcoming set of breaking changes to Go, or
             other dependencies, which will require an update to the is-ignored library.

@@ -10,12 +10,12 @@ updates:
       - "chore"
       - "bump-patch"
 
-  - package-ecosystem: cargo
+  - package-ecosystem: gomod
     directory: /
     schedule:
       interval: daily
     labels:
       - "dependencies"
-      - "rust"
+      - "go"
       - "chore"
       - "bump-patch"
